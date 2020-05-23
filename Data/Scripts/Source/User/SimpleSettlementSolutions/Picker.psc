@@ -49,10 +49,10 @@ Event OnWorkshopNPCTransfer(Location akNewWorkshopLocation, Keyword akActionKW)
 EndEvent
 
 WorkshopScript Function pick(Location akSelectLocation = None)
-	SimpleSettlementSolutions:Logger:Picker.logOpeningMenu(self)
+	SimpleSettlementSolutions:Picker:Logger.logOpeningMenu(self)
 	Location selectedLocation = OpenWorkshopSettlementMenuEx(SelectionKeyword, ConfirmationMessage, akSelectLocation, RequiredKeywords, ExcludedKeywords, ExcludeZeroPopulation, RequireOwnership, TurnOffHeader, OnlyPotentialVassalSettlements, DisableReservedByQuests)
 	
-	SimpleSettlementSolutions:Logger:Picker.logPickerResult(self, selectedLocation)
+	SimpleSettlementSolutions:Picker:Logger.logPickerResult(self, selectedLocation)
 	
 	if (!selectedLocation)
 		if (NoSelectionMessage)
@@ -63,7 +63,7 @@ WorkshopScript Function pick(Location akSelectLocation = None)
 	endif
 	
 	WorkshopScript workshopRef = WorkshopParent.getWorkshopFromLocation(selectedLocation)
-	SimpleSettlementSolutions:Logger:Picker.logLocationSettlementMatch(self, selectedLocation, workshopRef)
+	SimpleSettlementSolutions:Picker:Logger.logLocationSettlementMatch(self, selectedLocation, workshopRef)
 	
 	return workshopRef
 EndFunction

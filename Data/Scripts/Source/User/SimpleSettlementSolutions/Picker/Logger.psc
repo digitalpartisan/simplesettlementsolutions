@@ -1,4 +1,4 @@
-Scriptname SimpleSettlementSolutions:Logger:Picker Hidden Const DebugOnly
+Scriptname SimpleSettlementSolutions:Picker:Logger Hidden Const DebugOnly
 
 String[] Function getTags() Global
 	String[] tags = new String[1]
