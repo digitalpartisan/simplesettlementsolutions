@@ -1,21 +1,21 @@
 Scriptname SimpleSettlementSolutions:Picker:Logger Hidden Const DebugOnly
 
 String[] Function getTags() Global
-	String[] tags = new String[1]
-	tags[0] = "Picker"
+	String[] tags = new String[0]
+	tags.Add("Picker")
 	return tags
 EndFunction
 
 Bool Function log(String sMessage) Global
-	return Jiffy:Loggout.log(SimpleSettlementSolutions:Logger.getName(), sMessage, getTags())
+	return SimpleSettlementSolutions:Logger.log(sMessage, getTags())
 EndFunction
 
 Bool Function warn(String sMessage) Global
-	return Jiffy:Loggout.warn(SimpleSettlementSolutions:Logger.getName(), sMessage, getTags())
+	return SimpleSettlementSolutions:Logger.warn(sMessage, getTags())
 EndFunction
 
 Bool Function error(String sMessage) Global
-	return Jiffy:Loggout.error(SimpleSettlementSolutions:Logger.getName(), sMessage, getTags())
+	return SimpleSettlementSolutions:Logger.error(sMessage, getTags())
 EndFunction
 
 Bool Function logOpeningMenu(SimpleSettlementSolutions:Picker pickerRef) Global
