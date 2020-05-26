@@ -2,8 +2,14 @@ Scriptname SimpleSettlementSolutions:LinkRefToWorkshop extends ObjectReference C
 
 Keyword Property MyKeyword Auto Const Mandatory
 
+Keyword Function getKeyword()
+	return MyKeyword
+EndFunction
+
 Function setLink(ObjectReference akTarget, ObjectReference linkedRef = None)
-	if (!MyKeyword)
+	Keyword linkType = getKeyword()
+
+	if (!linkType)
 		return
 	endif
 	
@@ -12,8 +18,8 @@ Function setLink(ObjectReference akTarget, ObjectReference linkedRef = None)
 		return
 	endif
 	
-	SimpleSettlementSolutions:Logger.logWorkshopLink(self, workshopRef, MyKeyword, linkedRef)
-	workshopRef.SetLinkedRef(linkedRef, MyKeyword)
+	SimpleSettlementSolutions:Logger.logWorkshopLink(self, workshopRef, linkType, linkedRef)
+	workshopRef.SetLinkedRef(linkedRef, linkType)
 EndFunction
 
 Function link(ObjectReference akReference)

@@ -48,18 +48,36 @@ Event OnWorkshopNPCTransfer(Location akNewWorkshopLocation, Keyword akActionKW)
 	endif
 EndEvent
 
-WorkshopScript Function pick(Location akSelectLocation = None)
+Location Function pickLocation(Location akSelectLocation = None)
 	SimpleSettlementSolutions:Picker:Logger.logOpeningMenu(self)
 	Location selectedLocation = OpenWorkshopSettlementMenuEx(SelectionKeyword, ConfirmationMessage, akSelectLocation, RequiredKeywords, ExcludedKeywords, ExcludeZeroPopulation, RequireOwnership, TurnOffHeader, OnlyPotentialVassalSettlements, DisableReservedByQuests)
-	
 	SimpleSettlementSolutions:Picker:Logger.logPickerResult(self, selectedLocation)
-	
+	return selectedLocation
+EndFunction
+
+WorkshopScript Function handleLocationConversion(Location selectedLocation)
+	WorkshopScript workshopRef = WorkshopParent.getWorkshopFromLocation(selectedLocation)
+	SimpleSettlementSolutions:Picker:Logger.logLocationSettlementMatch(self, selectedLocation, workshopRef)
+	return workshopRef
+EndFunction
+
+WorkshopScript Function pick(Location selectLocation = None)
+	Location selectedLocation = pickLocation(selectLocation)
 	if (!selectedLocation)
-		if (NoSelectionMessage)
-			NoSelectionMessage.Show()
-		endif
-		
+		NoSelectionMessage && NoSelectionMessage.Show()
 		return None
+	endif
+	
+	WorkshopScript workshopRef = WorkshopParent.getWorkshopFromLocation(selectedLocation)
+	SimpleSettlementSolutions:Picker:Logger.logLocationSettlementMatch(self, selectedLocation, workshopRef)
+	
+	return workshopRef
+EndFunction
+
+WorkshopScript Function forcePick(WorkshopScript defaultResult, Location selectLocation = None)
+	Location selectedLocation = pickLocation(selectLocation)
+	if (!selectedLocation)
+		return defaultResult
 	endif
 	
 	WorkshopScript workshopRef = WorkshopParent.getWorkshopFromLocation(selectedLocation)
