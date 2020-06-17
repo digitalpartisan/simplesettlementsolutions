@@ -9,7 +9,12 @@ CustomEvent Pulled
 Struct ScrapConversion
 	Component componentForm = None
 	MiscObject scrapForm = None
-	Int count = 0
+EndStruct
+
+Struct ScrapRecipe
+	FormList forms = None
+	Component result = None
+	Int amount = 0
 EndStruct
 
 Group Components
@@ -80,13 +85,47 @@ Group Scrap
 	MiscObject Property c_Wood_scrap Auto Const Mandatory
 EndGroup
 
+Group ScrapLists
+	FormList Property modScrapRecipe_NullMelee_Bone Auto Const Mandatory
+	FormList Property modScrapRecipe_NullMelee_Cloth Auto Const Mandatory
+	FormList Property modScrapRecipe_NullMelee_ClothMinor Auto Const Mandatory
+	FormList Property modScrapRecipe_NullMelee_Glass Auto Const Mandatory
+	FormList Property modScrapRecipe_NullMelee_Leather Auto Const Mandatory
+	FormList Property modScrapRecipe_NullMelee_LeatherMinor Auto Const Mandatory
+	FormList Property modScrapRecipe_NullMelee_Plastic Auto Const Mandatory
+	FormList Property modScrapRecipe_NullMelee_Steel Auto Const Mandatory
+	FormList Property modScrapRecipe_NullMelee_SteelHuge Auto Const Mandatory
+	FormList Property modScrapRecipe_NullMelee_SteelLarge Auto Const Mandatory
+	FormList Property modScrapRecipe_NullMelee_SteelMinor Auto Const Mandatory
+	FormList Property modScrapRecipe_NullMelee_Wood Auto Const Mandatory
+EndGroup
+
+Group ScrapListResult
+	Int Property ScrapResultBone = 2 Auto Const
+	Int Property ScrapResultCloth = 2 Auto Const
+	Int Property ScrapResultClothMinor = 2 Auto Const
+	Int Property ScrapResultGlass = 2 Auto Const
+	Int Property ScrapResultLeather = 2 Auto Const
+	Int Property ScrapResultLeatherMinor = 2 Auto Const
+	Int Property ScrapResultPlastic = 2 Auto Const
+	Int Property ScrapResultSteel = 2 Auto Const
+	Int Property ScrapResultSteelHuge = 6 Auto Const
+	Int Property ScrapResultSteelLarge = 4 Auto Const
+	Int Property ScrapResultSteelMinor = 2 Auto Const
+	Int Property ScrapResultWood = 2 Auto Const
+EndGroup
+
 FormList Property WorkshopConsumeScavenge Auto Const Mandatory
 
 ScrapConversion[] conversions = None
-ObjectReference containerRef = None
+ScrapRecipe[] recipes = None
 
 Bool Function validateConversion(ScrapConversion data)
-	return data.componentForm && data.scrapForm
+	return data && data.componentForm && data.scrapForm
+EndFunction
+
+Bool Function validateScrapRecipe(ScrapRecipe data)
+	return data && data.forms && data.result && data.amount
 EndFunction
 
 ScrapConversion Function makeConversion(Component componentForm, MiscObject scrapForm)
@@ -101,8 +140,22 @@ ScrapConversion Function makeConversion(Component componentForm, MiscObject scra
 	return result
 EndFunction
 
+ScrapRecipe Function makeRecipe(FormList forms, Component componentForm, Int iAmount)
+	if (!forms || !componentForm || !iAmount)
+		return None
+	endif
+	
+	ScrapRecipe result = new ScrapRecipe
+	result.forms = forms
+	result.result = componentForm
+	result.amount = iAmount
+	
+	return result
+EndFunction
+
 ScrapConversion[] Function makeConversions()
 	ScrapConversion[] result = new ScrapConversion[0]
+	
 	result.Add(makeConversion(c_Acid, c_Acid_scrap))
 	result.Add(makeConversion(c_Adhesive, c_Adhesive_scrap))
 	result.Add(makeConversion(c_Aluminum, c_Aluminum_scrap))
@@ -134,21 +187,55 @@ ScrapConversion[] Function makeConversions()
 	result.Add(makeConversion(c_Springs, c_Springs_scrap))
 	result.Add(makeConversion(c_Steel, c_Steel_scrap))
 	result.Add(makeConversion(c_Wood, c_Wood_scrap))
+	
+	return result
 EndFunction
 
-Function scrapData(ObjectReference destinationContainer, ScrapConversion data)
+ScrapRecipe[] Function makeRecipes()
+	ScrapRecipe[] result = new ScrapRecipe[0]
+	
+	result.Add(makeRecipe(modScrapRecipe_NullMelee_Bone, c_Bone, ScrapResultBone))
+	result.Add(makeRecipe(modScrapRecipe_NullMelee_Cloth, c_Cloth, ScrapResultCloth))
+	result.Add(makeRecipe(modScrapRecipe_NullMelee_ClothMinor, c_Cloth, ScrapResultClothMinor))
+	result.Add(makeRecipe(modScrapRecipe_NullMelee_Glass, c_Glass, ScrapResultGlass))
+	result.Add(makeRecipe(modScrapRecipe_NullMelee_Leather, c_Leather, ScrapResultLeather))
+	result.Add(makeRecipe(modScrapRecipe_NullMelee_LeatherMinor, c_Leather, ScrapResultLeatherMinor))
+	result.Add(makeRecipe(modScrapRecipe_NullMelee_Plastic, c_Plastic, ScrapResultPlastic))
+	result.Add(makeRecipe(modScrapRecipe_NullMelee_Steel, c_Steel, ScrapResultSteel))
+	result.Add(makeRecipe(modScrapRecipe_NullMelee_SteelHuge, c_Steel, ScrapResultSteelHuge))
+	result.Add(makeRecipe(modScrapRecipe_NullMelee_SteelLarge, c_Steel, ScrapResultSteelLarge))
+	result.Add(makeRecipe(modScrapRecipe_NullMelee_SteelMinor, c_Steel, ScrapResultSteelMinor))
+	result.Add(makeRecipe(modScrapRecipe_NullMelee_Wood, c_Wood, ScrapResultWood))
+	
+	return result
+EndFunction
+
+Function scrapConversion(ObjectReference destinationContainer, ScrapConversion data)
 	if (!validateConversion(data) || !destinationContainer)
 		return
 	endif
 	
-	data.count = GetComponentCount(data.componentForm)
-	if (!data.count)
+	Int iCount = GetComponentCount(data.componentForm)
+	if (!iCount)
 		return
 	endif
 	
-	RemoveComponents(data.componentForm, data.count, false)
-	destinationContainer.AddItem(data.scrapForm, data.count, false)
-	data.count = 0 ; not necessary, but cleanup is always a good idea
+	RemoveComponents(data.componentForm, iCount, true)
+	destinationContainer.AddItem(data.scrapForm, iCount, false)
+EndFunction
+
+Function scrapRecipe(ObjectReference destinationContainer, ScrapRecipe data)
+	if (!validateScrapRecipe(data) || !destinationContainer)
+		return
+	endIf
+	
+	Int iCount = GetItemCount(data.forms)
+	if (!iCount)
+		return
+	endif
+	
+	RemoveItem(data.forms, -1, true)
+	destinationContainer.AddItem(data.result, iCount * data.amount)
 EndFunction
 
 Function process(ObjectReference destinationContainer)
@@ -163,42 +250,62 @@ Event ObjectReference.OnItemRemoved(ObjectReference akSender, Form akBaseItem, i
 	
 EndEvent
 
+Bool Function isEmpty()
+	if (GetItemCount(WorkshopConsumeScavenge))
+		return false
+	endif
+	
+	if (!recipes)
+		return true
+	endif
+	
+	Int iCounter = 0
+	while (iCounter < recipes.Length)
+		if (validateScrapRecipe(recipes[iCounter]) && GetItemCount(recipes[iCounter].forms))
+			return false
+		endif
+		iCounter += 1
+	endWhile
+	
+	return true
+EndFunction
+
 Auto State Dormant
 	Event OnInit()
+		SetActorRefOwner(Game.GetPlayer())
+		AddInventoryEventFilter(None)
 		conversions = makeConversions()
+		recipes = makeRecipes()
 		GoToState("Waiting")
 	EndEvent
 EndState
 
 State Waiting
 	Function process(ObjectReference destinationContainer)
-		if (!destinationContainer || !conversions || !conversions.Length)
-			SendCustomEvent("Processed")
+		GoToState("Processing")
+		
+		if (!destinationContainer || !conversions || !conversions.Length || isEmpty())
+			GoToState("Waiting")
 			return
 		endif
 		
-		GoToState("Processing")
-		AddInventoryEventFilter(None)
-		
 		Int iCounter = 0
 		while (iCounter < conversions.Length)
-			scrapData(destinationContainer, conversions[iCounter])
+			scrapConversion(destinationContainer, conversions[iCounter])
+			iCounter += 1
+		endWhile
+		
+		iCounter = 0
+		while (iCounter < recipes.Length)
+			scrapRecipe(destinationContainer, recipes[iCounter])
 			iCounter += 1
 		endWhile
 	EndFunction
 	
 	Function pull(ObjectReference sourceContainer)
-		if (!sourceContainer)
-			SendCustomEvent("Pulled")
-			return
-		endif
-		
 		GoToState("Pulling")
-		containerRef = sourceContainer
-		containerRef.AddInventoryEventFilter(None)
-		RegisterForRemoteEvent(containerRef, "OnItemRemoved")
-		
-		containerRef.RemoveItem(WorkshopConsumeScavenge, -1, true, self)
+		sourceContainer && sourceContainer.GetItemCount(WorkshopConsumeScavenge) && sourceContainer.RemoveItem(WorkshopConsumeScavenge, -1, true, self)
+		GoToState("Waiting")
 	EndFunction
 EndState
 
@@ -209,13 +316,12 @@ State Processing
 	EndEvent
 	
 	Event OnEndState(String asOldState)
-		RemoveInventoryEventFilter(None)
 		SimpleSettlementSolutions:Logger.log(self + " is done processing")
 		SendCustomEvent("Processed")
 	EndEvent
 	
 	Event OnItemRemoved(Form akBaseItem, int aiItemCount, ObjectReference akItemReference, ObjectReference akDestContainer)
-		!GetComponentCount(None) && GoToState("Waiting")
+		isEmpty() && GoToState("Waiting")
 	EndEvent
 EndState
 
@@ -226,14 +332,7 @@ State Pulling
 	EndEvent
 	
 	Event OnEndState(String asOldState)
-		containerRef.RemoveInventoryEventFilter(None)
-		UnregisterForRemoteEvent(containerRef, "OnItemRemoved")
-		containerRef = None
 		SimpleSettlementSolutions:Logger.log(self + " is done pulling")
 		SendCustomEvent("Pulled")
-	EndEvent
-	
-	Event ObjectReference.OnItemRemoved(ObjectReference akSender, Form akBaseItem, int aiItemCount, ObjectReference akItemReference, ObjectReference akDestContainer)
-		akSender == containerRef && !containerRef.GetItemCount(WorkshopConsumeScavenge) && GoToState("Waiting")
 	EndEvent
 EndState
