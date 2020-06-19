@@ -1,5 +1,5 @@
 Scriptname SimpleSettlementSolutions:Scrapper extends ObjectReference
-{Autofill everyting.}
+{Autofill handles all mandatory properties.}
 
 CustomEvent Processing
 CustomEvent Processed
@@ -115,10 +115,18 @@ Group ScrapListResult
 	Int Property ScrapResultWood = 2 Auto Const
 EndGroup
 
+Group SoundSettings
+	Sound[] Property ScrappingSounds Auto Const
+	Int Property SoundInterval = 5 Auto Const
+	Sound Property DRScDeskMetalDrawerOpen Auto Const Mandatory
+	Sound Property DRScDeskMetalDrawerClose Auto Const Mandatory
+EndGroup
+
 FormList Property WorkshopConsumeScavenge Auto Const Mandatory
 
 ScrapConversion[] conversions = None
 ScrapRecipe[] recipes = None
+Int iProcessingCounter = 0
 
 Bool Function validateConversion(ScrapConversion data)
 	return data && data.componentForm && data.scrapForm
@@ -250,6 +258,14 @@ Event ObjectReference.OnItemRemoved(ObjectReference akSender, Form akBaseItem, i
 	
 EndEvent
 
+Event OnOpen(ObjectReference akActionRef)
+	DRScDeskMetalDrawerOpen.Play(self)
+EndEvent
+
+Event OnClose(ObjectReference akActionRef)
+	DRScDeskMetalDrawerClose.Play(self)
+EndEvent
+
 Bool Function isEmpty()
 	if (GetItemCount(WorkshopConsumeScavenge))
 		return false
@@ -311,16 +327,20 @@ EndState
 
 State Processing
 	Event OnBeginState(String asOldState)
+		iProcessingCounter = 0
 		SimpleSettlementSolutions:Logger.log(self + " is processing")
 		SendCustomEvent("Processing")
 	EndEvent
 	
 	Event OnEndState(String asOldState)
+		iProcessingCounter = 0 ; not required, but cleanup is always good
 		SimpleSettlementSolutions:Logger.log(self + " is done processing")
 		SendCustomEvent("Processed")
 	EndEvent
 	
 	Event OnItemRemoved(Form akBaseItem, int aiItemCount, ObjectReference akItemReference, ObjectReference akDestContainer)
+		iProcessingCounter += 1
+		SoundInterval && ScrappingSounds && ScrappingSounds.Length && iProcessingCounter % SoundInterval == 0 && (Jiffy:Utility:Array.random(ScrappingSounds as Var[]) as Sound).Play(self)
 		isEmpty() && GoToState("Waiting")
 	EndEvent
 EndState
