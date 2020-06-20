@@ -339,8 +339,8 @@ State Processing
 	EndEvent
 	
 	Event OnItemRemoved(Form akBaseItem, int aiItemCount, ObjectReference akItemReference, ObjectReference akDestContainer)
-		iProcessingCounter += 1
 		SoundInterval && ScrappingSounds && ScrappingSounds.Length && iProcessingCounter % SoundInterval == 0 && (Jiffy:Utility:Array.random(ScrappingSounds as Var[]) as Sound).Play(self)
+		iProcessingCounter += 1
 		isEmpty() && GoToState("Waiting")
 	EndEvent
 EndState
