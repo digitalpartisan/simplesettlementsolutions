@@ -1,4 +1,4 @@
-Scriptname SimpleSettlementSolutions:Picker extends WorkshopNPCScript
+Scriptname SimpleSettlementSolutions:Workshop:Picker extends WorkshopNPCScript
 {
 To use this script:
 
@@ -43,45 +43,78 @@ Group MiscSettlementPickerSettings
 EndGroup
 
 Event OnWorkshopNPCTransfer(Location akNewWorkshopLocation, Keyword akActionKW)
-	if (WorkshopParent.WorkshopAssignHome == akActionKW || WorkshopParent.WorkshopAssignCaravan == akActionKW || WorkshopParent.WorkshopAssignHomePermanentActor == akActionKW)
-		WorkshopParent.unassignActor(self, true)
-	endif
+	(WorkshopParent.WorkshopAssignHome == akActionKW || WorkshopParent.WorkshopAssignCaravan == akActionKW || WorkshopParent.WorkshopAssignHomePermanentActor == akActionKW) && WorkshopParent.unassignActor(self, true)
 EndEvent
 
-Location Function pickLocation(Location akSelectLocation = None)
-	SimpleSettlementSolutions:Picker:Logger.logOpeningMenu(self)
-	Location selectedLocation = OpenWorkshopSettlementMenuEx(SelectionKeyword, ConfirmationMessage, akSelectLocation, RequiredKeywords, ExcludedKeywords, ExcludeZeroPopulation, RequireOwnership, TurnOffHeader, OnlyPotentialVassalSettlements, DisableReservedByQuests)
-	SimpleSettlementSolutions:Picker:Logger.logPickerResult(self, selectedLocation)
-	return selectedLocation
+Function handleExclusion(WorkshopScript workshopRef = None, Bool bApply = true)
+	if (!workshopRef || !ExcludedKeywords)
+		return
+	endif
+	
+	Int iSize = ExcludedKeywords.GetSize()
+	if (!iSize)
+		return
+	endif
+
+	Int iCounter = 0
+	Keyword currentKeyword = None
+	while (iCounter < iSize)
+		currentKeyword = ExcludedKeywords.GetAt(iCounter) as Keyword
+		if (currentKeyword) ; Just in case a "none" record made it in to the list
+			if (bApply)
+				workshopRef.AddKeyword(currentKeyword)
+			else
+				workshopRef.RemoveKeyword(currentKeyword)
+			endif
+		endif
+		
+		iCounter += 1
+	endWhile
 EndFunction
 
 WorkshopScript Function handleLocationConversion(Location selectedLocation)
 	WorkshopScript workshopRef = WorkshopParent.getWorkshopFromLocation(selectedLocation)
-	SimpleSettlementSolutions:Picker:Logger.logLocationSettlementMatch(self, selectedLocation, workshopRef)
+	SimpleSettlementSolutions:Workshop:Picker:Logger.logLocationSettlementMatch(self, selectedLocation, workshopRef)
 	return workshopRef
 EndFunction
 
-WorkshopScript Function pick(Location selectLocation = None)
+Location Function pickLocation(Location akSelectLocation = None)
+	SimpleSettlementSolutions:Workshop:Picker:Logger.logOpeningMenu(self)
+	Location selectedLocation = OpenWorkshopSettlementMenuEx(SelectionKeyword, ConfirmationMessage, akSelectLocation, RequiredKeywords, ExcludedKeywords, ExcludeZeroPopulation, RequireOwnership, TurnOffHeader, OnlyPotentialVassalSettlements, DisableReservedByQuests)
+	SimpleSettlementSolutions:Workshop:Picker:Logger.logPickerResult(self, selectedLocation)
+	return selectedLocation
+EndFunction
+
+WorkshopScript Function pickWorkshop(Location selectLocation = None)
 	Location selectedLocation = pickLocation(selectLocation)
 	if (!selectedLocation)
-		NoSelectionMessage && NoSelectionMessage.Show()
 		return None
 	endif
 	
 	WorkshopScript workshopRef = WorkshopParent.getWorkshopFromLocation(selectedLocation)
-	SimpleSettlementSolutions:Picker:Logger.logLocationSettlementMatch(self, selectedLocation, workshopRef)
+	SimpleSettlementSolutions:Workshop:Picker:Logger.logLocationSettlementMatch(self, selectedLocation, workshopRef)
 	
 	return workshopRef
 EndFunction
 
+WorkshopScript Function pick(Location defaultLocation = None, WorkshopScript excludeWorkshopRef = None)
+	handleExclusion(excludeWorkshopRef)
+	WorkshopScript chosenWorkshop = pickWorkshop(defaultLocation)
+	handleExclusion(excludeWorkshopRef, false)
+	
+	if (!chosenWorkshop)
+		NoSelectionMessage && NoSelectionMessage.Show()
+		return None
+	endif
+	
+	return chosenWorkshop
+EndFunction
+
 WorkshopScript Function forcePick(WorkshopScript defaultResult, Location selectLocation = None)
-	Location selectedLocation = pickLocation(selectLocation)
-	if (!selectedLocation)
+	WorkshopScript result = pickWorkshop(selectLocation)
+	if (!result)
 		return defaultResult
 	endif
 	
-	WorkshopScript workshopRef = WorkshopParent.getWorkshopFromLocation(selectedLocation)
-	SimpleSettlementSolutions:Picker:Logger.logLocationSettlementMatch(self, selectedLocation, workshopRef)
-	
-	return workshopRef
+	return result
 EndFunction

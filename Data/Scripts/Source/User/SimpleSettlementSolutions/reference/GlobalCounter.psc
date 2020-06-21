@@ -1,4 +1,4 @@
-Scriptname SimpleSettlementSolutions:GlobalCounter extends ObjectReference Const
+Scriptname SimpleSettlementSolutions:Reference:GlobalCounter extends ObjectReference
 
 GlobalVariable Property MyGlobal Auto Const Mandatory
 Float Property Scale = 1.0 Auto Const
@@ -9,7 +9,7 @@ Function adjust(Float adjustment)
 	endif
 	
 	MyGlobal.mod(adjustment)
-	SimpleSettlementSolutions:Logger.logGlobalAdjustment(self, MyGlobal, adjustment)
+	SimpleSettlementSolutions:Reference:Logger.logGlobalAdjustment(self, MyGlobal, adjustment)
 EndFunction
 
 Function increment()

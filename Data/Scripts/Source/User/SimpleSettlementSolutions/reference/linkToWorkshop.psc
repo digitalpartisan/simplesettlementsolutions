@@ -1,4 +1,4 @@
-Scriptname SimpleSettlementSolutions:LinkRefToWorkshop extends ObjectReference Const
+Scriptname SimpleSettlementSolutions:Reference:LinkToWorkshop extends ObjectReference
 
 Keyword Property MyKeyword Auto Const Mandatory
 
@@ -18,7 +18,7 @@ Function setLink(ObjectReference akTarget, ObjectReference linkedRef = None)
 		return
 	endif
 	
-	SimpleSettlementSolutions:Logger.logWorkshopLink(self, workshopRef, linkType, linkedRef)
+	SimpleSettlementSolutions:Reference:Logger.logWorkshopLink(self, workshopRef, linkType, linkedRef)
 	workshopRef.SetLinkedRef(linkedRef, linkType)
 EndFunction
 
@@ -45,3 +45,4 @@ EndEvent
 Event OnWorkshopObjectGrabbed(ObjectReference akReference)
 	unlink(akReference)
 EndEvent
+

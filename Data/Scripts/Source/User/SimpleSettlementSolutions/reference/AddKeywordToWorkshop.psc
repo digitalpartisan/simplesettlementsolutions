@@ -1,4 +1,4 @@
-Scriptname SimpleSettlementSolutions:AddKeywordToWorkshop extends ObjectReference
+Scriptname SimpleSettlementSolutions:Reference:AddKeywordToWorkshop extends ObjectReference
 
 Keyword Property MyKeyword Auto Const Mandatory
 Bool Property OnlyIfPowered = false Auto Const
