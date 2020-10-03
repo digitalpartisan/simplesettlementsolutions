@@ -116,7 +116,13 @@ Group ScrapListResult
 EndGroup
 
 Group SoundSettings
-	Sound[] Property ScrappingSounds Auto Const
+	Sound Property UIWorkshopModeItemScrapGeneric Auto Const Mandatory
+	Sound Property UIWorkshopModeEnter Auto Const Mandatory
+	Sound Property UIWorkshopModeExit Auto Const Mandatory
+	Sound Property UIWorkshopModeItemPickUpGeneric Auto Const Mandatory
+	Sound Property UIWorkshopModeItemPutDownElectricBulbx Auto Const Mandatory
+	Sound Property UIWorkshopModeItemStore Auto Const Mandatory
+	Sound Property UIWorkshopPowerArmorWrenchCrank Auto Const Mandatory
 	Int Property SoundInterval = 5 Auto Const
 	Sound Property DRScDeskMetalDrawerOpen Auto Const Mandatory
 	Sound Property DRScDeskMetalDrawerClose Auto Const Mandatory
@@ -126,6 +132,7 @@ FormList Property WorkshopConsumeScavenge Auto Const Mandatory
 
 ScrapConversion[] conversions = None
 ScrapRecipe[] recipes = None
+Sound[] scrappingSounds = None
 Int iProcessingCounter = 0
 
 Bool Function validateConversion(ScrapConversion data)
@@ -218,6 +225,20 @@ ScrapRecipe[] Function makeRecipes()
 	return result
 EndFunction
 
+Sound[] Function makeScrappingSounds()
+	Sound[] result = new Sound[0]
+
+	result.Add(UIWorkshopModeItemScrapGeneric)
+	result.Add(UIWorkshopModeEnter)
+	result.Add(UIWorkshopModeEnter)
+	result.Add(UIWorkshopModeItemPickUpGeneric)
+	result.Add(UIWorkshopModeItemPutDownElectricBulbx)
+	result.Add(UIWorkshopModeItemStore)
+	result.Add(UIWorkshopPowerArmorWrenchCrank)
+
+	return result
+EndFunction
+
 Function scrapConversion(ObjectReference destinationContainer, ScrapConversion data)
 	if (!validateConversion(data) || !destinationContainer)
 		return
@@ -292,6 +313,7 @@ Auto State Dormant
 		AddInventoryEventFilter(None)
 		conversions = makeConversions()
 		recipes = makeRecipes()
+		scrappingSounds = makeScrappingSounds()
 		GoToState("Waiting")
 	EndEvent
 EndState
@@ -339,7 +361,7 @@ State Processing
 	EndEvent
 	
 	Event OnItemRemoved(Form akBaseItem, int aiItemCount, ObjectReference akItemReference, ObjectReference akDestContainer)
-		SoundInterval && ScrappingSounds && ScrappingSounds.Length && iProcessingCounter % SoundInterval == 0 && (Jiffy:Utility:Array.random(ScrappingSounds as Var[]) as Sound).Play(self)
+		SoundInterval && scrappingSounds && scrappingSounds.Length && iProcessingCounter % SoundInterval == 0 && (Jiffy:Utility:Array.random(scrappingSounds as Var[]) as Sound).Play(self)
 		iProcessingCounter += 1
 		isEmpty() && GoToState("Waiting")
 	EndEvent
