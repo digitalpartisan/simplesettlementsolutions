@@ -2,7 +2,6 @@ Scriptname SimpleSettlementSolutions:Workshop:Handler:Player extends SimpleSettl
 
 WorkshopParentScript Property WorkshopParent Auto Const Mandatory
 
-Function refreshStatus()
+Function refreshWorkshop()
 	setWorkshop(WorkshopParent.getWorkshopFromLocation(Game.GetPlayer().GetCurrentLocation()))
-	parent.refreshStatus()
 EndFunction
