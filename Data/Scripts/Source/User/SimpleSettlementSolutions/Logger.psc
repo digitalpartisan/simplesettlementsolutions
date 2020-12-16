@@ -15,3 +15,8 @@ EndFunction
 Bool Function error(String sMessage, String[] tags = None) Global
 	return Jiffy:Loggout.error(getName(), sMessage, tags)
 EndFunction
+
+Bool Function logTerminalLinks(ObjectReference akTerminalRef, Keyword linkTerminalKeyword, ObjectReference[] linkedRefs) Global
+	return log(akTerminalRef + " links of type " + linkTerminalKeyword + ": " + linkedRefs)
+EndFunction
+
