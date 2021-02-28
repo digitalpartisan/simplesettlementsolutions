@@ -1,9 +1,9 @@
-Scriptname SimpleSettlementSolutions:Reference:LinkToWorkshop extends ObjectReference
-{This script's name is a misnomer because in its original state, it linked the Workshop to itself rather than the other way around as the name would imply.
-To preverse functionality on already-released mods, the WrongWayAround boolean property was added and defaulted to true and must be set to false in order to achieve the expected functionality.}
+Scriptname SimpleSettlementSolutions:reference:LinkWorkshopTo extends ObjectReference
+{This script's name is a misnomer as this script originally links the workshop to this reference and not the other way around as the name would imply.
+For legacy reasons, this script must stay the way it is.}
 
 Keyword Property MyKeyword Auto Const Mandatory
-Bool Property WrongWayAround = true Auto Const
+Bool Property 
 
 Keyword Function getKeyword()
 	return MyKeyword
@@ -21,13 +21,8 @@ Function setLink(ObjectReference akTarget, ObjectReference linkedRef = None)
 		return
 	endif
 	
-	if (WrongWayAround)
-		SimpleSettlementSolutions:Reference:Logger.logLinkWorkshopTo(self, workshopRef, linkType, linkedRef)
-		workshopRef.SetLinkedRef(linkedRef, linkType)
-	else
-		SimpleSettlementSolutions:Reference:Logger.logLinkToWorkshop(self, workshopRef, linkType, linkedRef)
-		linkedRef.SetLinkedRef(workshopRef, linkType)
-	endif
+	SimpleSettlementSolutions:Reference:Logger.logWorkshopLink(self, workshopRef, linkType, linkedRef)
+	workshopRef.SetLinkedRef(linkedRef, linkType)
 EndFunction
 
 Function link(ObjectReference akReference)

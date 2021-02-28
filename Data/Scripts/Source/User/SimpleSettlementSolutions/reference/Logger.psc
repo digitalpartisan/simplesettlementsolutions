@@ -22,6 +22,10 @@ Bool Function logGlobalAdjustment(SimpleSettlementSolutions:Reference:GlobalCoun
 	return log(counter + " adjusted " + variable + " by " + adjustment + " to " + variable.GetValue())
 EndFunction
 
-Bool Function logWorkshopLink(SimpleSettlementSolutions:Reference:LinkToWorkshop linker, WorkshopScript workshopRef, Keyword linkKeyword, ObjectReference linkedRef) Global
-	return log(linker + " is linking to workshop " + workshopRef + " " + linkKeyword + " to " + linkedRef)
+Bool Function logLinkToWorkshop(SimpleSettlementSolutions:Reference:LinkToWorkshop linker, WorkshopScript workshopRef, Keyword linkKeyword, ObjectReference linkedRef) Global
+	return log(linker + " is linking " + linkedRef + " to workshop " + workshopRef + " with keyword " + linkKeyword)
+EndFunction
+
+Bool Function logLinkWorkshopTo(SimpleSettlementSolutions:Reference:LinkToWorkshop linker, WorkshopScript workshopRef, Keyword linkKeyword, ObjectReference linkedRef) Global
+	return log(linker + " is linking workshop " + workshopRef + " to " + linkedRef + " with keyword " + linkKeyword)
 EndFunction
